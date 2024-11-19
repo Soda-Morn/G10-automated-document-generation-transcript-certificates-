@@ -1,7 +1,7 @@
 import openpyxl
 from docxtpl import DocxTemplate
 from docx2pdf import convert
-import osimport pandas as pd
+import pandas as pd
 import os
 from PIL import Image, ImageDraw, ImageFont
 
