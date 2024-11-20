@@ -58,7 +58,7 @@ def generate_documents(template_path, student_list, doc_dir, pdf_dir):
             'pro_e': student[9],
             'ed_kh': student[10],
             'ed_e': student[11],
-            'cur_date': student[12]
+            # 'cur_date': student[12]
         }        
         # Render and save the .docx file
         doc_name = os.path.join(doc_dir, f"{student[1]}.docx")
@@ -80,6 +80,7 @@ create_directories(pdf_output_dir, doc_output_dir)
 # Generate documents
 generate_documents(template_file, student_list, doc_output_dir, pdf_output_dir)
 print("All documents have been processed!")
+
 
 
 def excel(filename):
