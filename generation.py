@@ -5,6 +5,7 @@ import pandas as pd
 import os
 from PIL import Image, ImageDraw, ImageFont
 
+# function for generate certificate
 def generate_certificates(excel_file, template_file, output_folder, font_path="arialbd.ttf", font_size=100):
     data = pd.read_excel(excel_file)
     if not os.path.exists(output_folder):
@@ -25,28 +26,25 @@ def generate_certificates(excel_file, template_file, output_folder, font_path="a
         certificate.save(output_path)
         print("Certificate generated for " + name + " and saved to " + output_path)
     print("All certificates have been generated!")
-# Example usage
+
 generate_certificates(
     excel_file="Certificate.xlsx",
     template_file="certificate.png",
     output_folder="Generate_certificate"
 )
 
-
-def load_student_data(file_name):
-    """Load student data from an Excel file."""
-    workbook = openpyxl.load_workbook(file_name)
+# function for create associate
+def excel(filename):
+    """Load the Excel file and return the sheet values."""
+    workbook = openpyxl.load_workbook(filename)
     sheet = workbook.active
     return list(sheet.values)
-def create_directories(*dirs):
-    """Create directories if they don't exist."""
-    for directory in dirs:
-        os.makedirs(directory, exist_ok=True)
-def generate_documents(template_path, student_list, doc_dir, pdf_dir):
-    student_info = DocxTemplate(template_path)
-    for student in student_list[1:]:  # Skip the header row
-        context = {
-            'name_kh': student[2],
+
+def save_document(template, docx_directory, student):
+    """Render the document with the given values and save it as a .docx file."""
+    doc = DocxTemplate(template)
+    doc.render({
+       'name_kh': student[2],
             'g1': student[4],
             'id_kh': student[0],
             'name_e': student[3],
@@ -57,32 +55,36 @@ def generate_documents(template_path, student_list, doc_dir, pdf_dir):
             'dob_e': student[7],
             'pro_e': student[9],
             'ed_kh': student[10],
-            'ed_e': student[11],
-            # 'cur_date': student[12]
-        }        
-        # Render and save the .docx file
-        doc_name = os.path.join(doc_dir, f"{student[1]}.docx")
-        student_info.render(context)
-        student_info.save(doc_name)
-        print(f"{doc_name} has been created.")      
-        # Convert the .docx file to PDF
-        pdf_name = os.path.join(pdf_dir, f"{student[1]}.pdf")
-        convert(doc_name, pdf_name)
-        print(f"{pdf_name} has been created.")
-# Main logic directly executed
-excel_file = 'Template associate degree - 2024.xlsx'
-template_file = 'WEP Temporary Certificate - Template.docx'
-pdf_output_dir = "pdf_outputs"
-doc_output_dir = "doc_name"
-# Load data and create directories
-student_list = load_student_data(excel_file)
-create_directories(pdf_output_dir, doc_output_dir)
-# Generate documents
-generate_documents(template_file, student_list, doc_output_dir, pdf_output_dir)
-print("All documents have been processed!")
+            'ed_e': student[11]
+    })
+    doc_name = os.path.join(docx_directory, str(student[4]) + ".docx")
+    doc.save(doc_name)
+    return doc_name
 
+def convert_to_pdf(doc_path, pdf_directory):
+    """Convert the .docx file to a .pdf file."""
+    pdf_name = os.path.join(pdf_directory, os.path.splitext(os.path.basename(doc_path))[0] + ".pdf")
+    convert(doc_path, pdf_name)
 
+def main():
+    filename = "Associate.xlsx"
+    template = "WEP Temporary Certificate - Template.docx"
+    docx_directory = "Associate degree_Documents"
+    pdf_directory = "Associate degree_PDF"
 
+    os.makedirs(docx_directory, exist_ok=True)
+    os.makedirs(pdf_directory, exist_ok=True)
+
+    name_data = excel(filename)
+
+    for value_tuple in name_data[1:]:
+        doc_path = save_document(template, docx_directory, value_tuple)
+        convert_to_pdf(doc_path, pdf_directory)
+
+    print("All documents have been processed!")
+main()
+
+#function for generate transcript
 def excel(filename):
     """Load the Excel file and return the sheet values."""
     workbook = openpyxl.load_workbook(filename)
@@ -170,6 +172,4 @@ def main():
         convert_to_pdf(doc_path, pdf_directory)
 
     print("All documents have been processed!")
-
-# Call the main function directly
 main()
