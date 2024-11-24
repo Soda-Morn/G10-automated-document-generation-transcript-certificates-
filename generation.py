@@ -27,21 +27,13 @@ def generate_certificates(excel_file, template_file, output_folder, font_path="a
         print("Certificate generated for " + name + " and saved to " + output_path)
     print("All certificates have been generated!")
 
-generate_certificates(
-    excel_file="Certificate.xlsx",
-    template_file="certificate.png",
-    output_folder="Generate_certificate"
-)
-
 # function for create associate
-def excel(filename):
-    """Load the Excel file and return the sheet values."""
+def AssociateExcel(filename):
     workbook = openpyxl.load_workbook(filename)
     sheet = workbook.active
     return list(sheet.values)
 
-def save_document(template, docx_directory, student):
-    """Render the document with the given values and save it as a .docx file."""
+def Associate_doc(template, docx_directory, student):
     doc = DocxTemplate(template)
     doc.render({
        'name_kh': student[2],
@@ -57,16 +49,15 @@ def save_document(template, docx_directory, student):
             'ed_kh': student[10],
             'ed_e': student[11]
     })
-    doc_name = os.path.join(docx_directory, str(student[4]) + ".docx")
+    doc_name = os.path.join(docx_directory, str(student[3]) + ".docx")
     doc.save(doc_name)
     return doc_name
 
-def convert_to_pdf(doc_path, pdf_directory):
-    """Convert the .docx file to a .pdf file."""
+def Associate_convertToPDF(doc_path, pdf_directory):
     pdf_name = os.path.join(pdf_directory, os.path.splitext(os.path.basename(doc_path))[0] + ".pdf")
     convert(doc_path, pdf_name)
 
-def main():
+def AssociateGenerate(generate_DOC=True, generate_PDF=True):
     filename = "Associate.xlsx"
     template = "WEP Temporary Certificate - Template.docx"
     docx_directory = "Associate degree_Documents"
@@ -75,24 +66,25 @@ def main():
     os.makedirs(docx_directory, exist_ok=True)
     os.makedirs(pdf_directory, exist_ok=True)
 
-    name_data = excel(filename)
+    name_data = AssociateExcel(filename)
 
     for value_tuple in name_data[1:]:
-        doc_path = save_document(template, docx_directory, value_tuple)
-        convert_to_pdf(doc_path, pdf_directory)
-
-    print("All documents have been processed!")
-main()
+        doc_path = Associate_doc(template, docx_directory, value_tuple)
+        if generate_DOC:
+            Associate_convertToPDF(doc_path, pdf_directory)
+    if generate_DOC and generate_PDF:
+        print("All documents (DOC and PDF) have been processed!")
+    else:
+        print("All DOC files have been processed!")
 
 #function for generate transcript
-def excel(filename):
+def TranscriptExcel(filename):
     """Load the Excel file and return the sheet values."""
     workbook = openpyxl.load_workbook(filename)
     sheet = workbook.active
     return list(sheet.values)
 
-def save_document(template, docx_directory, value):
-    """Render the document with the given values and save it as a .docx file."""
+def Transcript_document(template, docx_directory, value):
     doc = DocxTemplate(template)
     doc.render({
         "student_id": value[0],
@@ -151,12 +143,11 @@ def save_document(template, docx_directory, value):
     doc.save(doc_name)
     return doc_name
 
-def convert_to_pdf(doc_path, pdf_directory):
-    """Convert the .docx file to a .pdf file."""
+def TranscriptToPDF(doc_path, pdf_directory):
     pdf_name = os.path.join(pdf_directory, os.path.splitext(os.path.basename(doc_path))[0] + ".pdf")
     convert(doc_path, pdf_name)
 
-def main():
+def Transcript(generate_doc=True, generate_pdf=True):
     filename = "data.xlsx"
     template = "template-pnc.docx"
     docx_directory = "Template_Documents"
@@ -165,11 +156,61 @@ def main():
     os.makedirs(docx_directory, exist_ok=True)
     os.makedirs(pdf_directory, exist_ok=True)
 
-    name_data = excel(filename)
+    name_data = TranscriptExcel(filename)
 
     for value_tuple in name_data[1:]:
-        doc_path = save_document(template, docx_directory, value_tuple)
-        convert_to_pdf(doc_path, pdf_directory)
+        doc_path = Transcript_document(template, docx_directory, value_tuple)
+        if generate_doc:
+            Associate_convertToPDF(doc_path, pdf_directory)
+    if generate_doc and generate_pdf:
+        print("All documents (DOC and PDF) have been processed!")
+    else:
+        print("All DOC files have been processed!")
 
-    print("All documents have been processed!")
-main()
+
+#Function have choice for user
+def GenetateChoice():
+    print("Choose an option to generate documents:")
+    print("1. Associate Degree")
+    print("2. Certificates")
+    print("3. Transcripts")
+    choice = input("Enter your choice (1, 2, or 3): ")
+    
+    if choice == "1":
+        print("Do you want to generate:")
+        print("1. Only DOC files")
+        print("2. Only PDF file")
+        print("3. Generate PDF and DOC")
+        associate_choice = input("Enter your choice (1 or 2): ")
+        if associate_choice == "1":
+            AssociateGenerate(generate_DOC = True, generate_PDF = False)
+        elif associate_choice == "2":
+            AssociateGenerate(generate_DOC= False, generate_PDF = True)
+        elif associate_choice == "3":
+            AssociateGenerate(generate_DOC= True, generate_PDF = True)
+        else:
+            print("Invalid choice for Associate Degree. Exiting.")
+    elif choice == "2":
+        generate_certificates(
+            excel_file="Certificate.xlsx",
+            template_file="certificate.png",
+            output_folder="Certificates"
+        )
+    elif choice == "3":
+        print("Do you want to generate:")
+        print("1. Only DOC files")
+        print("2. Only PDF file")
+        print("3. Generate PDF and DOC")
+        Transcript_choice = input("Enter your choice (1 or 2 or 3): ")
+        if Transcript_choice == "1":
+            Transcript(generate_doc = True, generate_pdf = False)
+        elif Transcript_choice == "2":
+            Transcript(generate_doc= False, generate_pdf = True)
+        elif  Transcript_choice == "3":
+            Transcript(generate_doc = True, generate_pdf = True)
+        else:
+            print("Invalid choice for Associate Degree. Exiting.")
+    else:
+        print("Invalid choice. Exiting.")
+GenetateChoice()
+
