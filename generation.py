@@ -57,7 +57,7 @@ def Associate_convertToPDF(doc_path, pdf_directory):
     pdf_name = os.path.join(pdf_directory, os.path.splitext(os.path.basename(doc_path))[0] + ".pdf")
     convert(doc_path, pdf_name)
 
-def AssociateGenerate(generate_pdf = True):
+def AssociateGenerate(generate_DOC=True, generate_PDF=True):
     filename = "Associate.xlsx"
     template = "WEP Temporary Certificate - Template.docx"
     docx_directory = "Associate degree_Documents"
@@ -70,9 +70,9 @@ def AssociateGenerate(generate_pdf = True):
 
     for value_tuple in name_data[1:]:
         doc_path = Associate_doc(template, docx_directory, value_tuple)
-        if generate_pdf:
+        if generate_DOC:
             Associate_convertToPDF(doc_path, pdf_directory)
-    if generate_pdf:
+    if generate_DOC and generate_PDF:
         print("All documents (DOC and PDF) have been processed!")
     else:
         print("All DOC files have been processed!")
@@ -83,7 +83,6 @@ def TranscriptExcel(filename):
     workbook = openpyxl.load_workbook(filename)
     sheet = workbook.active
     return list(sheet.values)
-
 
 def Transcript_document(template, docx_directory, value):
     doc = DocxTemplate(template)
@@ -148,7 +147,7 @@ def TranscriptToPDF(doc_path, pdf_directory):
     pdf_name = os.path.join(pdf_directory, os.path.splitext(os.path.basename(doc_path))[0] + ".pdf")
     convert(doc_path, pdf_name)
 
-def Transcript(generate_PDF):
+def Transcript(generate_doc=True, generate_pdf=True):
     filename = "data.xlsx"
     template = "template-pnc.docx"
     docx_directory = "Template_Documents"
@@ -161,9 +160,9 @@ def Transcript(generate_PDF):
 
     for value_tuple in name_data[1:]:
         doc_path = Transcript_document(template, docx_directory, value_tuple)
-        if generate_PDF:
+        if generate_doc:
             Associate_convertToPDF(doc_path, pdf_directory)
-    if generate_PDF:
+    if generate_doc and generate_pdf:
         print("All documents (DOC and PDF) have been processed!")
     else:
         print("All DOC files have been processed!")
@@ -184,11 +183,11 @@ def GenetateChoice():
         print("3. Generate PDF and DOC")
         associate_choice = input("Enter your choice (1 or 2): ")
         if associate_choice == "1":
-            AssociateGenerate(generate_pdf = False)
+            AssociateGenerate(generate_DOC = True, generate_PDF = False)
         elif associate_choice == "2":
-            AssociateGenerate(generate_pdf= True)
+            AssociateGenerate(generate_DOC= False, generate_PDF = True)
         elif associate_choice == "3":
-            AssociateGenerate()
+            AssociateGenerate(generate_DOC= True, generate_PDF = True)
         else:
             print("Invalid choice for Associate Degree. Exiting.")
     elif choice == "2":
@@ -204,13 +203,14 @@ def GenetateChoice():
         print("3. Generate PDF and DOC")
         Transcript_choice = input("Enter your choice (1 or 2 or 3): ")
         if Transcript_choice == "1":
-            Transcript(generate_PDF = False)
+            Transcript(generate_doc = True, generate_pdf = False)
         elif Transcript_choice == "2":
-            Transcript(generate_PDF= True)
+            Transcript(generate_doc= False, generate_pdf = True)
         elif  Transcript_choice == "3":
-            Transcript(generate_PDF)
+            Transcript(generate_doc = True, generate_pdf = True)
         else:
             print("Invalid choice for Associate Degree. Exiting.")
     else:
         print("Invalid choice. Exiting.")
 GenetateChoice()
+
