@@ -8,7 +8,6 @@ import openpyxl
 import pandas as pd
 from datetime import datetime
 
-
 # Function for generating certificates
 def generate_certificates(excel_file, template_file, output_folder, font_path="arialbd.ttf", font_size=100):
     data = pd.read_excel(excel_file)
@@ -28,7 +27,7 @@ def generate_certificates(excel_file, template_file, output_folder, font_path="a
         draw.text(name_position, name, fill="orange", font=font_name)
         output_path = os.path.join(output_folder, "certificate_" + name + ".png")
         certificate.save(output_path)
-        print(f"Certificate generated for {name} and saved to {output_path}")
+        print("Certificate generated for {} and saved to {}".format(name, output_path))
     print("All certificates have been generated!")
 
 # Functions for generating Associate Degree documents
@@ -55,7 +54,7 @@ def AssociateDocument(template, output_directory, student):
         'ed_e': student[11],
         'cur_date': current_date
     })
-    doc_name = os.path.join(output_directory, f"{student[3]}.docx")
+    doc_name = os.path.join(output_directory, "{}.docx".format(student[3]))
     doc.save(doc_name)
     return doc_name
 
@@ -83,7 +82,7 @@ def GeneratAssociate(option):
             AssociateConvertPDF(doc_path, pdf_directory)
             if option == "pdf":
                 os.remove(doc_path)
-    print(f"All files for option '{option}' have been generated!")
+    print("All files for option '{}' have been generated!".format(option))
 
 # Functions for generating Transcripts
 def TranscriptExcel_data(filename):
@@ -135,7 +134,7 @@ def TranscriptDocument(template, output_directory, row_data):
         "oop": row_data[37],
         "op_g": row_data[38],
         "lar": row_data[39],
-        "la_g": row_data[40],
+        "lar_g": row_data[40],
         "vue": row_data[41],
         "vu_g": row_data[42],
         "vc2": row_data[43],
@@ -148,7 +147,7 @@ def TranscriptDocument(template, output_directory, row_data):
         "in_g": row_data[50],
         'cur_date': current_date
     })
-    doc_name = os.path.join(output_directory, f"{row_data[1]}.docx")
+    doc_name = os.path.join(output_directory, "{}.docx".format(row_data[1]))
     doc.save(doc_name)
     return doc_name
 
@@ -176,7 +175,7 @@ def generate_transcripts(option):
             TranscriptPdf(doc_path, pdf_directory)
             if option == "pdf":
                 os.remove(doc_path)
-    print(f"All files for option '{option}' have been generated!")
+    print("All files for option '{}' have been generated!".format(option))
 
 # GUI Implementation
 def create_ui():
@@ -186,124 +185,65 @@ def create_ui():
         tk.Label(option_window, text="Select the output format:").pack(padx=20, pady=10)
 
         def generate_with_option(selected_option):
-            generate_function(selected_option, notify=lambda msg: messagebox.showinfo("Success", msg))
+            generate_function(selected_option)
+            result_label.config(text="{} generated successfully!".format(title))  # Update the message
             option_window.destroy()
 
-        tk.Button(option_window, text="DOCX Only", command=lambda: generate_with_option("doc")).pack(padx=20, pady=5)
-        tk.Button(option_window, text="PDF Only", command=lambda: generate_with_option("pdf")).pack(padx=20, pady=5)
-        tk.Button(option_window, text="Both DOCX and PDF", command=lambda: generate_with_option("both")).pack(padx=20, pady=5)
+        tk.Button(option_window, text="DOCX Only", bg="blue", fg="white", command=lambda: generate_with_option("doc")).pack(padx=20, pady=5)
+        tk.Button(option_window, text="PDF Only", bg="blue", fg="white", command=lambda: generate_with_option("pdf")).pack(padx=20, pady=5)
+        tk.Button(option_window, text="Both DOCX and PDF", bg="blue", fg="white", command=lambda: generate_with_option("both")).pack(padx=20, pady=5)
+
+    def generate_certificates_direct():
+        generate_certificates(
+            excel_file="Certificate.xlsx",
+            template_file="certificate.png",
+            output_folder="Certificates"
+        )
+        result_label.config(text="Certificates generated successfully!")  # Update the message
+
+    def generate_all():
+        option_window = tk.Toplevel(window)
+        option_window.title("Generate All")
+        tk.Label(option_window, text="Select the output format for all documents:").pack(padx=20, pady=10)
+
+        def generate_all_with_option(selected_option):
+            generate_transcripts(selected_option)
+            generate_certificates(
+                excel_file="Certificate.xlsx",
+                template_file="certificate.png",
+                output_folder="Certificates"
+            )
+            GeneratAssociate(selected_option)
+            option_window.destroy()
+            result_label.config(text="All documents have been generated successfully!")  # Update the message
+
+        tk.Button(option_window, text="DOCX Only", bg="blue", fg="white", command=lambda: generate_all_with_option("doc")).pack(padx=20, pady=5)
+        tk.Button(option_window, text="PDF Only", bg="blue", fg="white", command=lambda: generate_all_with_option("pdf")).pack(padx=20, pady=5)
+        tk.Button(option_window, text="Both DOCX and PDF", bg="blue", fg="white", command=lambda: generate_all_with_option("both")).pack(padx=20, pady=5)
 
     window = tk.Tk()
-    window.geometry("400x400")
-    window.title("Automated Document Generation")
+    window.geometry("500x500")
+    window.title("Automated Document Generator")
 
-    tk.Label(window, text="Automated Document Generation", font=("Arial", 16, "bold"), fg="blue").pack(pady=20)
+    # Add a styled title
+    title_label = tk.Label(
+        window,
+        text="Automated Document Generation",
+        font=("Helvetica", 34, "bold"),
+        fg="teal"
+    )
+    title_label.pack(pady=20)
 
-    tk.Button(window, text="Generate Transcripts", font=("Arial", 12), bg="blue", fg="white", width=20,
-              command=lambda: show_option_menu("Generate Transcripts", generate_transcripts)).pack(pady=10)
+    # Add result feedback label
+    result_label = tk.Label(window, text="", fg="green", font=("Arial", 12))
+    result_label.pack(pady=10)
 
-    tk.Button(window, text="Generate Certificates", font=("Arial", 12), bg="blue", fg="white", width=20,
-              command=lambda: generate_certificates(
-                  excel_file="Certificate.xlsx",
-                  template_file="certificate.png",
-                  output_folder="Certificates",
-                  notify=lambda msg: messagebox.showinfo("Success", msg)
-              )).pack(pady=10)
-
-    tk.Button(window, text="Generate Associate", font=("Arial", 12), bg="blue", fg="white", width=20,
-              command=lambda: show_option_menu("Generate Associate", GeneratAssociate)).pack(pady=10)
-
-    tk.Button(
-        window, 
-        text="Generate All", 
-        font=("Arial", 12), 
-        bg="green", 
-        fg="white", 
-        width=20,
-        command=lambda: show_option_menu(
-            "Generate All Documents", 
-            lambda option: (
-                generate_certificates(
-                    excel_file="Certificate.xlsx",
-                    template_file="certificate.png",
-                    output_folder="Certificates",
-                    notify=lambda msg: messagebox.showinfo("Success", msg)
-                ),
-                generate_transcripts(option, notify=lambda msg: messagebox.showinfo("Success", msg)),
-                GeneratAssociate(option, notify=lambda msg: messagebox.showinfo("Success", msg))
-            )
-        )
-    ).pack(pady=10)
+    # Buttons
+    tk.Button(window, text="Generate Transcript", bg="teal", fg="white", font=("Arial", 12, "bold"), width=25, height=2, padx=15, command=lambda: show_option_menu("Transcript", generate_transcripts)).pack(pady=10)
+    tk.Button(window, text="Generate Certificates", bg="teal", fg="white", font=("Arial", 12, "bold"), width=25, height=2, padx=15, command=generate_certificates_direct).pack(pady=10)
+    tk.Button(window, text="Generate Associate", bg="teal", fg="white", font=("Arial", 12, "bold"), width=25, height=2, padx=15, command=lambda: show_option_menu("Associate Documents", GeneratAssociate)).pack(pady=10)
+    tk.Button(window, text="Generate All", bg="teal", fg="white", font=("Arial", 12, "bold"), width=25, height=2, padx=15, command=generate_all).pack(pady=20)
 
     window.mainloop()
 
-# Update your functions to accept a `notify` parameter
-def generate_certificates(excel_file, template_file, output_folder, font_path="arialbd.ttf", font_size=100, notify=None):
-    data = pd.read_excel(excel_file)
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-    font_name = ImageFont.truetype(font_path, font_size)
-    for index, row in data.iterrows():
-        name = row["Name"]
-        certificate = Image.open(template_file)
-        draw = ImageDraw.Draw(certificate)
-        if len(name) >= 15 and len(name) < 25:
-            name_position = (550, 600)
-        elif len(name) >= 10 and len(name) < 15:
-            name_position = (700, 600)
-        else:
-            name_position = (730, 600)
-        draw.text(name_position, name, fill="orange", font=font_name)
-        output_path = os.path.join(output_folder, "certificate_" + name + ".png")
-        certificate.save(output_path)
-        print(f"Certificate generated for {name} and saved to {output_path}")
-    if notify:
-        notify("All certificates have been generated!")
-
-def GeneratAssociate(option, notify=None):
-    excel_file = "Associate.xlsx"
-    template_file = "WEP Temporary Certificate - Template.docx"
-    docx_directory = "Associate_Documents"
-    pdf_directory = "Associate_PDF"
-
-    os.makedirs(docx_directory, exist_ok=True)
-    os.makedirs(pdf_directory, exist_ok=True)
-    data_rows = AssociateExcel_data(excel_file)
-
-    for row in data_rows[1:]:
-        if option in ["doc", "both"]:
-            doc_path = AssociateDocument(template_file, docx_directory, row)
-        if option in ["pdf", "both"]:
-            if option == "pdf":
-                doc_path = AssociateDocument(template_file, pdf_directory, row)
-            AssociateConvertPDF(doc_path, pdf_directory)
-            if option == "pdf":
-                os.remove(doc_path)
-    if notify:
-        notify(f"All files for option '{option}' have been generated!")
-
-def generate_transcripts(option, notify=None):
-    excel_file = "data.xlsx"
-    template_file = "template-pnc.docx"
-    docx_directory = "Transcript_Doc"
-    pdf_directory = "Transcript_PDF"
-
-    os.makedirs(docx_directory, exist_ok=True)
-    os.makedirs(pdf_directory, exist_ok=True)
-    data_rows = TranscriptExcel_data(excel_file)
-
-    for row in data_rows[1:]:
-        if option in ["doc", "both"]:
-            doc_path = TranscriptDocument(template_file, docx_directory, row)
-        if option in ["pdf", "both"]:
-            if option == "pdf":
-                doc_path = TranscriptDocument(template_file, pdf_directory, row)
-            TranscriptPdf(doc_path, pdf_directory)
-            if option == "pdf":
-                os.remove(doc_path)
-    if notify:
-        notify(f"All files for option '{option}' have been generated!")
-
-# Run the Application
-if __name__ == "__main__":
-    create_ui()
+create_ui()
